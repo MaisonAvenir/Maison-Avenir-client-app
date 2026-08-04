@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/thin/style.css">
+<style>
+body{margin:0}
+a{color:#2A2622;border-bottom:1px solid rgba(42,38,34,0.12);text-decoration:none}
+a:hover{color:#C24A36;border-bottom-color:#C24A36}
+</style>
+</helmet>
+<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#EDE7DD;padding:48px;box-sizing:border-box;font-family:'Inter',sans-serif">
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" hint-size="402,874">
+<div style="height:100%;display:flex;flex-direction:column;background:#F4F1EC;overflow:hidden">
+<div style="flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden">
+
+<sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+<div style="height:100%;display:flex;flex-direction:column;overflow:hidden">
+<div style="padding:56px 24px 18px;text-align:center;border-bottom:1px solid rgba(42,38,34,0.12);background:#FAF7F2">
+<div style="font-family:Inter,sans-serif;font-size:11px;font-weight:500;letter-spacing:0.22em;text-transform:uppercase;color:#A89E8C">Avenir Privé</div>
+</div>
+<div style="flex:1;overflow-y:auto;padding:28px 24px 32px;display:flex;flex-direction:column;gap:36px">
+<div>
+<div style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:26px;color:#6B6357;margin-bottom:4px">Good evening,</div>
+<div style="font-family:'Cormorant Garamond',serif;font-size:34px;color:#1A1714;line-height:1.05">{{ clientName }}</div>
+<div style="font-family:Inter,sans-serif;font-size:11px;letter-spacing:0.08em;color:#A89E8C;margin-top:8px">Private Client since {{ memberSince }}</div>
+</div>
+<div style="background:#FAF7F2;border:1px solid #E2DBD0;padding:20px;display:flex;align-items:center;gap:16px">
+<div style="width:52px;height:52px;border-radius:999px;background:{{ advisorBg }};flex-shrink:0"></div>
+<div style="flex:1;min-width:0">
+<div style="font-family:Inter,sans-serif;font-size:9.5px;letter-spacing:0.18em;text-transform:uppercase;color:#A89E8C">Your Advisor</div>
+<div style="font-family:'Cormorant Garamond',serif;font-size:19px;color:#1A1714;margin-top:2px">{{ advisorName }}</div>
+<div style="font-family:Inter,sans-serif;font-size:11.5px;color:#6B6357">{{ advisorTitle }}</div>
+</div>
+<button onClick="{{ goMessages }}" style="background:none;border:1px solid #2A2622;padding:9px 14px;font-family:Inter,sans-serif;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:#2A2622;cursor:pointer" style-hover="background:#2A2622;color:#FAF7F2">Message</button>
+</div>
+<div>
+<div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:14px">
+<div style="font-family:Inter,sans-serif;font-size:10.5px;letter-spacing:0.2em;text-transform:uppercase;color:#A89E8C">New For You</div>
+<a href="#" onClick="{{ goForYou }}" style="font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase">View All</a>
+</div>
+<div style="display:flex;gap:14px;overflow-x:auto;padding-bottom:4px">
+<sc-for list="{{ homeFeedPreview }}" as="item" hint-placeholder-count="2">
+<div onClick="{{ goForYou }}" style="flex:0 0 140px;cursor:pointer">
+<div style="width:140px;height:168px;background:{{ item.bg }};position:relative;overflow:hidden">
+<div style="position:absolute;inset:0;background:linear-gradient(180deg,transparent 55%,rgba(0,0,0,0.22) 100%)"></div>
+</div>
+<div style="margin-top:9px;font-family:'Cormorant Garamond',serif;font-size:15px;color:#1A1714;line-height:1.2">{{ item.name }}</div>
+<div style="font-family:Inter,sans-serif;font-size:11.5px;color:#6B6357;margin-top:2px">{{ item.priceStr }}</div>
+</div>
+</sc-for>
+</div>
+</div>
+<div>
+<div style="font-family:Inter,sans-serif;font-size:10.5px;letter-spacing:0.2em;text-transform:uppercase;color:#A89E8C;margin-bottom:14px">Recently Yours</div>
+<div style="display:flex;gap:16px;align-items:center;background:#FAF7F2;border:1px solid #E2DBD0;padding:16px">
+<div style="width:64px;height:64px;background:{{ recentPurchase.bg }};flex-shrink:0"></div>
+<div style="flex:1;min-width:0">
+<div style="font-family:'Cormorant Garamond',serif;font-size:17px;color:#1A1714;line-height:1.2">{{ recentPurchase.name }}</div>
+<div style="font-family:Inter,sans-serif;font-size:11px;color:#A89E8C;margin-top:3px">{{ recentPurchase.date }} · {{ recentPurchase.priceStr }}</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isForYou }}" hint-placeholder-val="{{ false }}">
+<div style="height:100%;display:flex;flex-direction:column;overflow:hidden">
+<div style="padding:56px 24px 16px;border-bottom:1px solid rgba(42,38,34,0.12);background:#FAF7F2">
+<div style="font-family:Inter,sans-serif;font-size:11px;font-weight:500;letter-spacing:0.22em;text-transform:uppercase;color:#A89E8C;text-align:center">For You</div>
+</div>
+<div style="flex:1;overflow-y:auto;padding:28px 24px 32px;display:flex;flex-direction:column">
+<sc-if value="{{ feedDone }}" hint-placeholder-val="{{ false }}">
+<div style="margin:auto;text-align:center;padding:40px 12px">
+<div style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:22px;color:#6B6357;margin-bottom:10px">You're all caught up.</div>
+<div style="font-family:Inter,sans-serif;font-size:13px;color:#A89E8C;line-height:1.6">Margaux will let you know when something new arrives.</div>
+<sc-if value="{{ savedItems.length }}" hint-placeholder-val="{{ false }}">
+<div style="margin-top:28px;display:flex;flex-wrap:wrap;gap:8px;justify-content:center">
+<sc-for list="{{ savedItems }}" as="s" hint-placeholder-count="1">
+<div style="border:1px solid #C9C0B2;padding:8px 14px;font-family:Inter,sans-serif;font-size:11px;color:#2A2622">{{ s.name }}</div>
+</sc-for>
+</div>
+</sc-if>
+</div>
+</sc-if>
+<sc-if value="{{ feedItem }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;flex:1">
+<div style="font-family:Inter,sans-serif;font-size:11px;color:#A89E8C;text-align:right;margin-bottom:10px">{{ feedPos }} / {{ feedTotal }}</div>
+<div style="width:100%;aspect-ratio:4/5;background:{{ feedItem.bg }};position:relative;overflow:hidden">
+<div style="position:absolute;inset:0;background:linear-gradient(180deg,transparent 50%,rgba(0,0,0,0.32) 100%)"></div>
+<div style="position:absolute;bottom:16px;left:16px;right:16px;color:#FAF7F2">
+<div style="font-family:Inter,sans-serif;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;opacity:0.85">{{ feedItem.material }}</div>
+<div style="font-family:'Cormorant Garamond',serif;font-size:26px;margin-top:4px">{{ feedItem.name }}</div>
+</div>
+</div>
+<div style="padding:16px 2px 4px;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:15px;color:#6B6357;line-height:1.5">"{{ feedItem.note }}"</div>
+<div style="font-family:Inter,sans-serif;font-size:16px;color:#1A1714;padding:8px 2px 8px">{{ feedItem.priceStr }}</div>
+<div style="display:flex;gap:14px;margin-top:auto;padding-top:12px">
+<button onClick="{{ onPass }}" style="flex:1;border:1px solid #2A2622;background:none;padding:15px;font-family:Inter,sans-serif;font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:#2A2622;cursor:pointer" style-hover="background:#2A2622;color:#FAF7F2">Not For Me</button>
+<button onClick="{{ onSave }}" style="flex:1;border:1px solid #C24A36;background:#C24A36;padding:15px;font-family:Inter,sans-serif;font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:#FAF7F2;cursor:pointer" style-hover="background:#A33D2C">Save</button>
+</div>
+</div>
+</sc-if>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isMessages }}" hint-placeholder-val="{{ false }}">
+<div style="height:100%;display:flex;flex-direction:column;overflow:hidden">
+<div style="padding:56px 24px 16px;border-bottom:1px solid rgba(42,38,34,0.12);background:#FAF7F2;display:flex;align-items:center;gap:12px">
+<div style="width:38px;height:38px;border-radius:999px;background:{{ advisorBg }}"></div>
+<div>
+<div style="font-family:'Cormorant Garamond',serif;font-size:17px;color:#1A1714">{{ advisorName }}</div>
+<div style="font-family:Inter,sans-serif;font-size:10.5px;color:#A89E8C">{{ advisorTitle }}</div>
+</div>
+</div>
+<div style="flex:1;overflow-y:auto;padding:20px 20px;display:flex;flex-direction:column;gap:14px">
+<sc-for list="{{ messages }}" as="m" hint-placeholder-count="3">
+<div style="display:flex;justify-content:{{ m.justify }}">
+<div style="max-width:78%;padding:12px 14px;font-family:Inter,sans-serif;font-size:13.5px;line-height:1.5;background:{{ m.bg }};color:{{ m.color }};border:{{ m.border }}">
+{{ m.text }}
+<div style="font-size:9.5px;color:{{ m.timeColor }};margin-top:5px;text-align:right">{{ m.time }}</div>
+</div>
+</div>
+</sc-for>
+</div>
+<div style="display:flex;gap:10px;padding:14px 16px;border-top:1px solid rgba(42,38,34,0.12);background:#FAF7F2">
+<input value="{{ draft }}" onChange="{{ onDraftChange }}" placeholder="Write to Margaux…" style="flex:1;padding:12px 14px;font-family:Inter,sans-serif;font-size:13px;color:#2A2622;background:#F4F1EC;border:1px solid #C9C0B2;border-radius:4px;outline:none"/>
+<button onClick="{{ onSend }}" style="width:44px;height:44px;border-radius:999px;background:#C24A36;border:0;color:#FAF7F2;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0" style-hover="background:#A33D2C"><i class="ph-thin ph-arrow-up" style="font-size:17px"></i></button>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isHistory }}" hint-placeholder-val="{{ false }}">
+<div style="height:100%;display:flex;flex-direction:column;overflow:hidden">
+<div style="padding:56px 24px 16px;border-bottom:1px solid rgba(42,38,34,0.12);background:#FAF7F2;text-align:center">
+<div style="font-family:Inter,sans-serif;font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:#A89E8C">Purchase History</div>
+<div style="font-family:'Cormorant Garamond',serif;font-size:14px;color:#6B6357;margin-top:6px">{{ pieceCount }} pieces · {{ totalSpent }} since {{ memberSince }}</div>
+</div>
+<div style="flex:1;overflow-y:auto;padding:8px 24px 24px">
+<sc-for list="{{ purchases }}" as="p" hint-placeholder-count="5">
+<div style="display:flex;align-items:center;gap:14px;padding:18px 0;border-bottom:1px solid rgba(42,38,34,0.1)">
+<div style="width:48px;height:48px;background:{{ p.bg }};flex-shrink:0"></div>
+<div style="flex:1;min-width:0">
+<div style="font-family:'Cormorant Garamond',serif;font-size:16px;color:#1A1714;line-height:1.2">{{ p.name }}</div>
+<div style="font-family:Inter,sans-serif;font-size:11px;color:#A89E8C;margin-top:3px">{{ p.date }}</div>
+</div>
+<div style="font-family:Inter,sans-serif;font-size:13px;color:#2A2622">{{ p.priceStr }}</div>
+</div>
+</sc-for>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isProfile }}" hint-placeholder-val="{{ false }}">
+<div style="height:100%;display:flex;flex-direction:column;overflow:hidden">
+<div style="padding:56px 24px 16px;border-bottom:1px solid rgba(42,38,34,0.12);background:#FAF7F2;text-align:center">
+<div style="font-family:Inter,sans-serif;font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:#A89E8C">Profile</div>
+</div>
+<div style="flex:1;overflow-y:auto;padding:32px 24px;display:flex;flex-direction:column;gap:32px;align-items:center;text-align:center">
+<div>
+<div style="width:84px;height:84px;border-radius:999px;background:{{ advisorBg }};margin:0 auto 16px"></div>
+<div style="font-family:'Cormorant Garamond',serif;font-size:24px;color:#1A1714">{{ clientName }}</div>
+<div style="font-family:Inter,sans-serif;font-size:11px;letter-spacing:0.1em;color:#A89E8C;margin-top:6px">Private Client since {{ memberSince }}</div>
+</div>
+<div style="width:100%;text-align:left">
+<div style="font-family:Inter,sans-serif;font-size:10.5px;letter-spacing:0.2em;text-transform:uppercase;color:#A89E8C;margin-bottom:12px">Materials You Love</div>
+<div style="display:flex;flex-wrap:wrap;gap:8px">
+<div style="border:1px solid #C9C0B2;padding:8px 14px;font-family:Inter,sans-serif;font-size:11px;color:#2A2622">Brass</div>
+<div style="border:1px solid #C9C0B2;padding:8px 14px;font-family:Inter,sans-serif;font-size:11px;color:#2A2622">Linen</div>
+<div style="border:1px solid #C9C0B2;padding:8px 14px;font-family:Inter,sans-serif;font-size:11px;color:#2A2622">Oak</div>
+<div style="border:1px solid #C9C0B2;padding:8px 14px;font-family:Inter,sans-serif;font-size:11px;color:#2A2622">Ceramic</div>
+</div>
+</div>
+<button onClick="{{ goMessages }}" style="width:100%;background:#1A1714;color:#FAF7F2;border:0;padding:16px;font-family:Inter,sans-serif;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;cursor:pointer" style-hover="background:#C24A36">Contact {{ advisorName }}</button>
+<a href="#">Sign Out</a>
+</div>
+</div>
+</sc-if>
+
+</div>
+<div style="display:flex;border-top:1px solid rgba(42,38,34,0.12);background:#FAF7F2;padding:10px 6px 24px;flex-shrink:0">
+<sc-for list="{{ tabs }}" as="t" hint-placeholder-count="5">
+<button onClick="{{ t.onClick }}" style="flex:1;background:none;border:0;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;padding:4px 0;color:{{ t.color }}">
+<i class="{{ t.icon }}" style="font-size:20px"></i>
+<span style="font-family:Inter,sans-serif;font-size:9.5px;letter-spacing:0.04em">{{ t.label }}</span>
+</button>
+</sc-for>
+</div>
+</div>
+</x-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:500,&quot;height&quot;:950},&quot;clientName&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Eleanor Whitfield&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Content&quot;},&quot;advisorName&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Margaux Sinclair&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Content&quot;}}">
+const PALETTES = {
+  brass:   ['#D4B27A', '#8C6A3A', '#5C4623'],
+  linen:   ['#E8E0D0', '#C9C0B2', '#A89E8C'],
+  oak:     ['#C7A988', '#8E6F50', '#523B26'],
+  plaster: ['#EDE7DD', '#D8CFC0', '#B8AC97'],
+  stone:   ['#D6CEC1', '#A89E8C', '#6B6357'],
+  ceramic: ['#F0E6D6', '#D2BFA1', '#9A8266'],
+  velvet:  ['#A33D2C', '#6E2316', '#3A1009'],
+};
+function paletteBg(key) {
+  const p = PALETTES[key] || PALETTES.brass;
+  return `radial-gradient(ellipse at 30% 25%, ${p[0]} 0%, ${p[1]} 55%, ${p[2]} 100%)`;
+}
+
+const ADVISOR = { name: 'Margaux Sinclair', title: 'Client Advisor', palette: 'brass' };
+const MEMBER_SINCE = 2019;
+
+const PURCHASES = [
+  { id: 1, name: 'The Brass Candlestick Pair', date: 'June 14, 2026', price: 420, palette: 'brass' },
+  { id: 2, name: 'Linen Throw, in Stone', date: 'March 2, 2026', price: 248, palette: 'linen' },
+  { id: 3, name: 'Oak Refectory Table', date: 'November 20, 2025', price: 3800, palette: 'oak' },
+  { id: 4, name: 'Hand-thrown Ceramic Vase', date: 'August 9, 2025', price: 165, palette: 'ceramic' },
+  { id: 5, name: 'Velvet Armchair, in Ink', date: 'April 30, 2025', price: 2200, palette: 'velvet' },
+];
+
+const FEED = [
+  { id: 101, name: 'Aged Brass Candelabra', price: 560, palette: 'brass', material: 'Brass', note: 'Margaux thought of you, after the candlesticks you chose in June.' },
+  { id: 102, name: 'Plaster Table Lamp', price: 340, palette: 'plaster', material: 'Plaster', note: 'A quieter companion to the armchair in your sitting room.' },
+  { id: 103, name: 'Hand-loomed Wool Rug, in Clay', price: 1950, palette: 'stone', material: 'Wool', note: 'Just arrived from our weaver in Umbria.' },
+  { id: 104, name: 'Ceramic Pitcher Set', price: 210, palette: 'ceramic', material: 'Ceramic', note: 'Pairs with the vase from last summer.' },
+];
+
+class Component extends DCLogic {
+  state = {
+    tab: 'home',
+    feedIndex: 0,
+    reactions: {},
+    messages: [
+      { id: 1, from: 'advisor', text: 'The Brass Candelabra just arrived — thought of your candlesticks straight away.', time: '9:14 AM' },
+      { id: 2, from: 'client', text: 'It\u2019s lovely. Does it come in a smaller scale?', time: '9:20 AM' },
+      { id: 3, from: 'advisor', text: 'Yes — I\u2019ll set one aside so you can see it in person before it\u2019s listed.', time: '9:22 AM' },
+    ],
+    draft: '',
+  };
+
+  goTab = (key) => this.setState({ tab: key });
+
+  react = (kind) => {
+    const item = FEED[this.state.feedIndex];
+    if (!item) return;
+    this.setState((s) => ({
+      reactions: { ...s.reactions, [item.id]: kind },
+      feedIndex: s.feedIndex + 1,
+    }));
+  };
+
+  setDraft = (e) => this.setState({ draft: e.target.value });
+
+  send = () => {
+    const text = this.state.draft.trim();
+    if (!text) return;
+    this.setState((s) => ({
+      messages: [...s.messages, { id: Date.now(), from: 'client', text, time: 'Just now' }],
+      draft: '',
+    }));
+  };
+
+  renderVals() {
+    const { tab, feedIndex, reactions, messages, draft } = this.state;
+    const advisorName = this.props.advisorName ?? ADVISOR.name;
+    const clientName = this.props.clientName ?? 'Eleanor Whitfield';
+    const feedRaw = FEED[feedIndex] || null;
+    const savedItems = FEED.filter((f) => reactions[f.id] === 'saved');
+    const totalSpent = PURCHASES.reduce((s, p) => s + p.price, 0);
+
+    const tabDefs = [
+      { key: 'home', icon: 'ph-thin ph-house', label: 'Home' },
+      { key: 'foryou', icon: 'ph-thin ph-sparkle', label: 'For You' },
+      { key: 'messages', icon: 'ph-thin ph-chat-circle-dots', label: 'Messages' },
+      { key: 'history', icon: 'ph-thin ph-clock-counter-clockwise', label: 'History' },
+      { key: 'profile', icon: 'ph-thin ph-user', label: 'Profile' },
+    ];
+    const tabs = tabDefs.map((t) => ({
+      ...t,
+      onClick: () => this.goTab(t.key),
+      color: t.key === tab ? '#C24A36' : '#A89E8C',
+    }));
+
+    const withDisplay = (p) => ({ ...p, bg: paletteBg(p.palette), priceStr: '$' + p.price.toLocaleString() });
+
+    const mappedMessages = messages.map((m) => {
+      const fromAdvisor = m.from === 'advisor';
+      return {
+        ...m,
+        justify: fromAdvisor ? 'flex-start' : 'flex-end',
+        bg: fromAdvisor ? '#FAF7F2' : '#1A1714',
+        color: fromAdvisor ? '#2A2622' : '#FAF7F2',
+        border: fromAdvisor ? '1px solid #E2DBD0' : 'none',
+        timeColor: fromAdvisor ? '#A89E8C' : 'rgba(250,247,242,0.55)',
+      };
+    });
+
+    return {
+      isHome: tab === 'home',
+      isForYou: tab === 'foryou',
+      isMessages: tab === 'messages',
+      isHistory: tab === 'history',
+      isProfile: tab === 'profile',
+      tabs,
+      advisorName,
+      advisorTitle: ADVISOR.title,
+      advisorBg: paletteBg(ADVISOR.palette),
+      clientName,
+      memberSince: MEMBER_SINCE,
+      purchases: PURCHASES.map(withDisplay),
+      recentPurchase: withDisplay(PURCHASES[0]),
+      homeFeedPreview: FEED.slice(0, 2).map(withDisplay),
+      feedItem: feedRaw ? withDisplay(feedRaw) : null,
+      feedDone: !feedRaw,
+      feedPos: Math.min(feedIndex + 1, FEED.length),
+      feedTotal: FEED.length,
+      savedItems,
+      onPass: () => this.react('passed'),
+      onSave: () => this.react('saved'),
+      messages: mappedMessages,
+      draft,
+      onDraftChange: this.setDraft,
+      onSend: this.send,
+      totalSpent: '$' + totalSpent.toLocaleString(),
+      pieceCount: PURCHASES.length,
+      goHome: () => this.goTab('home'),
+      goForYou: () => this.goTab('foryou'),
+      goMessages: () => this.goTab('messages'),
+      goHistory: () => this.goTab('history'),
+    };
+  }
+}
+</script>
+</body>
+</html>
