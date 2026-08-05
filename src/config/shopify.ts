@@ -16,7 +16,7 @@ export const SHOPIFY_CONFIG = {
   myshopifyDomain: '0ec086-3d.myshopify.com',
 
   /** Customer Account API "Mobile" client ID, from the Headless channel's Customer Account API settings. */
-  customerAccountApiClientId: 'REPLACE_WITH_CUSTOMER_ACCOUNT_API_CLIENT_ID',
+  customerAccountApiClientId: '8a395b8d-a2c4-4add-9c48-b605ef5aa0bc',
 
   /**
    * The numeric shop id used in the mobile OAuth callback scheme, e.g. "69813895395".
@@ -26,7 +26,7 @@ export const SHOPIFY_CONFIG = {
   shopId: '69813895395',
 
   /** Public Storefront API access token, from the Headless channel's Storefront API settings. */
-  storefrontAccessToken: 'REPLACE_WITH_STOREFRONT_ACCESS_TOKEN',
+  storefrontAccessToken: '505e898eb83665bedf5a046a9c9eb0eb',
 
   /** Storefront API version to call. */
   storefrontApiVersion: '2026-01',
