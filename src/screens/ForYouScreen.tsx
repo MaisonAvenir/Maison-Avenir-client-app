@@ -1,6 +1,6 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import React from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { Eyebrow } from '../components/Eyebrow';
 import { PlaceholderSwatch } from '../components/PlaceholderSwatch';
@@ -10,10 +10,49 @@ import { formatPrice } from '../data/mockData';
 import { colors, fonts } from '../theme/tokens';
 
 export function ForYouScreen() {
-  const { advisor, feedItems, feedIndex, currentFeedItem, savedItems, reactToCurrentItem } = useAppState();
+  const {
+    advisor,
+    feedItems,
+    feedIndex,
+    currentFeedItem,
+    savedItems,
+    reactToCurrentItem,
+    isLoadingCustomerData,
+    customerDataError,
+  } = useAppState();
   const feedTotal = feedItems.length;
   const feedPos = Math.min(feedIndex + 1, feedTotal);
   const advisorFirstName = advisor.name.split(' ')[0];
+
+  if (isLoadingCustomerData && feedItems.length === 0) {
+    return (
+      <View style={styles.screen}>
+        <ScreenHeader>
+          <Eyebrow align="center" size={11}>
+            For You
+          </Eyebrow>
+        </ScreenHeader>
+        <View style={styles.centered}>
+          <ActivityIndicator color={colors.bark} />
+        </View>
+      </View>
+    );
+  }
+
+  if (customerDataError) {
+    return (
+      <View style={styles.screen}>
+        <ScreenHeader>
+          <Eyebrow align="center" size={11}>
+            For You
+          </Eyebrow>
+        </ScreenHeader>
+        <View style={styles.centered}>
+          <Text style={styles.errorText}>{customerDataError}</Text>
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.screen}>
@@ -30,7 +69,11 @@ export function ForYouScreen() {
               {feedPos} / {feedTotal}
             </Text>
             <View style={styles.imageWrap}>
-              <PlaceholderSwatch palette={currentFeedItem.palette} style={StyleSheet.absoluteFill} />
+              {currentFeedItem.imageUrl ? (
+                <Image source={{ uri: currentFeedItem.imageUrl }} style={StyleSheet.absoluteFill} />
+              ) : (
+                <PlaceholderSwatch palette={currentFeedItem.palette} style={StyleSheet.absoluteFill} />
+              )}
               <LinearGradient
                 colors={['transparent', 'rgba(0,0,0,0.32)']}
                 locations={[0.5, 1]}
@@ -83,6 +126,18 @@ export function ForYouScreen() {
 }
 
 const styles = StyleSheet.create({
+  centered: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 24,
+  },
+  errorText: {
+    fontFamily: fonts.body,
+    fontSize: 13,
+    color: colors.persianRed,
+    textAlign: 'center',
+  },
   screen: {
     flex: 1,
     backgroundColor: colors.canvas,

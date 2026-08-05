@@ -5,6 +5,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Eyebrow } from '../components/Eyebrow';
 import { PlaceholderSwatch } from '../components/PlaceholderSwatch';
 import { ScreenHeader } from '../components/ScreenHeader';
+import { useAuth } from '../auth/AuthContext';
 import { useAppState } from '../context/AppStateContext';
 import { colors, fonts } from '../theme/tokens';
 import type { RootTabParamList } from '../types';
@@ -13,6 +14,7 @@ type Props = BottomTabScreenProps<RootTabParamList, 'Profile'>;
 
 export function ProfileScreen({ navigation }: Props) {
   const { client, advisor } = useAppState();
+  const { logout } = useAuth();
 
   return (
     <View style={styles.screen}>
@@ -51,7 +53,7 @@ export function ProfileScreen({ navigation }: Props) {
           <Text style={styles.contactButtonText}>Contact {advisor.name}</Text>
         </Pressable>
 
-        <Pressable>
+        <Pressable onPress={logout}>
           <Text style={styles.signOut}>Sign Out</Text>
         </Pressable>
       </ScrollView>

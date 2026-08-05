@@ -13,8 +13,11 @@ import React, { useCallback } from 'react';
 import { View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { AuthProvider, useAuth } from './src/auth/AuthContext';
+import { isShopifyConfigured } from './src/config/shopify';
 import { AppStateProvider } from './src/context/AppStateContext';
 import { RootTabs } from './src/navigation/RootTabs';
+import { LoginScreen } from './src/screens/LoginScreen';
 import { colors } from './src/theme/tokens';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
@@ -55,13 +58,41 @@ export default function App() {
   return (
     <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
       <SafeAreaProvider>
-        <AppStateProvider>
+        <AuthProvider>
           <NavigationContainer theme={navigationTheme}>
             <StatusBar style="dark" />
-            <RootTabs />
+            <AuthGate />
           </NavigationContainer>
-        </AppStateProvider>
+        </AuthProvider>
       </SafeAreaProvider>
     </View>
+  );
+}
+
+function AuthGate() {
+  const { isAuthenticated, isLoading } = useAuth();
+
+  // Until Shopify credentials are filled in (src/config/shopify.ts), run with demo data
+  // so the app is still usable for design/dev without requiring sign-in.
+  if (!isShopifyConfigured()) {
+    return (
+      <AppStateProvider>
+        <RootTabs />
+      </AppStateProvider>
+    );
+  }
+
+  if (isLoading) {
+    return <View style={{ flex: 1, backgroundColor: colors.canvas }} />;
+  }
+
+  if (!isAuthenticated) {
+    return <LoginScreen />;
+  }
+
+  return (
+    <AppStateProvider>
+      <RootTabs />
+    </AppStateProvider>
   );
 }

@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { FlatList, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, FlatList, Image, StyleSheet, Text, View } from 'react-native';
 
 import { Eyebrow } from '../components/Eyebrow';
 import { PlaceholderSwatch } from '../components/PlaceholderSwatch';
@@ -10,12 +10,16 @@ import { colors, fonts } from '../theme/tokens';
 import type { Purchase } from '../types';
 
 export function HistoryScreen() {
-  const { purchases, client } = useAppState();
+  const { purchases, client, isLoadingCustomerData, customerDataError } = useAppState();
   const totalSpent = useMemo(() => purchases.reduce((sum, p) => sum + p.price, 0), [purchases]);
 
   const renderItem = ({ item }: { item: Purchase }) => (
     <View style={styles.row}>
-      <PlaceholderSwatch palette={item.palette} style={styles.thumb} />
+      {item.imageUrl ? (
+        <Image source={{ uri: item.imageUrl }} style={styles.thumb} />
+      ) : (
+        <PlaceholderSwatch palette={item.palette} style={styles.thumb} />
+      )}
       <View style={styles.rowInfo}>
         <Text style={styles.rowName}>{item.name}</Text>
         <Text style={styles.rowDate}>{item.date}</Text>
@@ -35,13 +39,27 @@ export function HistoryScreen() {
         </Text>
       </ScreenHeader>
 
-      <FlatList
-        data={purchases}
-        keyExtractor={(p) => p.id}
-        renderItem={renderItem}
-        contentContainerStyle={styles.list}
-        ItemSeparatorComponent={() => <View style={styles.divider} />}
-      />
+      {isLoadingCustomerData && purchases.length === 0 ? (
+        <View style={styles.centered}>
+          <ActivityIndicator color={colors.bark} />
+        </View>
+      ) : customerDataError ? (
+        <View style={styles.centered}>
+          <Text style={styles.errorText}>{customerDataError}</Text>
+        </View>
+      ) : purchases.length === 0 ? (
+        <View style={styles.centered}>
+          <Text style={styles.emptyText}>No purchases yet.</Text>
+        </View>
+      ) : (
+        <FlatList
+          data={purchases}
+          keyExtractor={(p) => p.id}
+          renderItem={renderItem}
+          contentContainerStyle={styles.list}
+          ItemSeparatorComponent={() => <View style={styles.divider} />}
+        />
+      )}
     </View>
   );
 }
@@ -100,5 +118,23 @@ const styles = StyleSheet.create({
     fontFamily: fonts.body,
     fontSize: 13,
     color: colors.ink,
+  },
+  centered: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 24,
+  },
+  errorText: {
+    fontFamily: fonts.body,
+    fontSize: 13,
+    color: colors.persianRed,
+    textAlign: 'center',
+  },
+  emptyText: {
+    fontFamily: fonts.body,
+    fontSize: 13,
+    color: colors.clay,
+    textAlign: 'center',
   },
 });

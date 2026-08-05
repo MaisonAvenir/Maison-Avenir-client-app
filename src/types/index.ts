@@ -29,6 +29,8 @@ export interface Purchase {
   date: string;
   price: number;
   palette: PaletteKey;
+  /** Real product photo, when available; falls back to the palette swatch otherwise. */
+  imageUrl?: string;
 }
 
 export type FeedReaction = 'saved' | 'passed' | null;
@@ -42,6 +44,8 @@ export interface FeedItem {
   /** Note from the advisor explaining why this item was picked. */
   note: string;
   reaction: FeedReaction;
+  /** Real product photo, when available; falls back to the palette swatch otherwise. */
+  imageUrl?: string;
 }
 
 export type MessageSender = 'advisor' | 'client';
