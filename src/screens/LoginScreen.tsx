@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Eyebrow } from '../components/Eyebrow';
 import { useAuth } from '../auth/AuthContext';
 import { colors, fonts } from '../theme/tokens';
 
@@ -23,9 +22,7 @@ export function LoginScreen() {
   return (
     <View style={[styles.screen, { paddingTop: insets.top + 40, paddingBottom: insets.bottom + 32 }]}>
       <View style={styles.body}>
-        <Eyebrow align="center" size={11}>
-          Avenir Privé
-        </Eyebrow>
+        <Image source={require('../../assets/logo-avenir.png')} style={styles.logo} resizeMode="contain" />
         <Text style={styles.title}>Welcome back.</Text>
         <Text style={styles.subtitle}>
           Sign in with the email address on your Maison Avenir account to see your purchase history and the
@@ -62,6 +59,10 @@ const styles = StyleSheet.create({
   body: {
     marginTop: 60,
     alignItems: 'center',
+  },
+  logo: {
+    width: 168,
+    height: 47,
   },
   title: {
     fontFamily: fonts.displayItalic,
