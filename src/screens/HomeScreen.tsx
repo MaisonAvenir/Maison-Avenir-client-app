@@ -1,6 +1,6 @@
 import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import React from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { Eyebrow } from '../components/Eyebrow';
 import { PlaceholderSwatch } from '../components/PlaceholderSwatch';
@@ -63,7 +63,11 @@ export function HomeScreen({ navigation }: Props) {
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.previewRow}>
             {homeFeedPreview.map((item) => (
               <Pressable key={item.id} onPress={() => navigation.navigate('ForYou')} style={styles.previewCard}>
-                <PlaceholderSwatch palette={item.palette} style={styles.previewImage} />
+                {item.imageUrl ? (
+                  <Image source={{ uri: item.imageUrl }} style={styles.previewImage} />
+                ) : (
+                  <PlaceholderSwatch palette={item.palette} style={styles.previewImage} />
+                )}
                 <Text style={styles.previewName}>{item.name}</Text>
                 <Text style={styles.previewPrice}>{formatPrice(item.price)}</Text>
               </Pressable>
@@ -76,7 +80,11 @@ export function HomeScreen({ navigation }: Props) {
             Recently Yours
           </Eyebrow>
           <View style={styles.recentCard}>
-            <PlaceholderSwatch palette={recentPurchase.palette} style={styles.recentThumb} />
+            {recentPurchase.imageUrl ? (
+              <Image source={{ uri: recentPurchase.imageUrl }} style={styles.recentThumb} />
+            ) : (
+              <PlaceholderSwatch palette={recentPurchase.palette} style={styles.recentThumb} />
+            )}
             <View style={styles.recentInfo}>
               <Text style={styles.recentName}>{recentPurchase.name}</Text>
               <Text style={styles.recentMeta}>
