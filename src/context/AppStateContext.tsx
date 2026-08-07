@@ -6,6 +6,7 @@ import {
   updateCustomerMaterials,
   updateCustomerRecommendedProducts,
   updateCustomerWishlist,
+  updateCustomerWishlistNotes,
 } from '../api/shopifyCustomerApi';
 import { resolveRecommendedProducts } from '../api/shopifyStorefrontApi';
 import { notifyStaff } from '../api/staffNotify';
@@ -24,7 +25,10 @@ interface AppStateValue {
   currentFeedItem: FeedItem | null;
   savedItems: FeedItem[];
   wishlistItems: FeedItem[];
+  wishlistNotes: Record<string, string>;
   reactToCurrentItem: (reaction: 'saved' | 'passed') => void;
+  removeFromWishlist: (itemId: string) => Promise<void>;
+  updateWishlistNote: (itemId: string, note: string) => Promise<void>;
   isLoadingCustomerData: boolean;
   customerDataError: string | null;
   updateMaterials: (materials: string[]) => Promise<void>;
@@ -41,6 +45,7 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
   const [feedIndex, setFeedIndex] = useState(0);
   const [wishlistGids, setWishlistGids] = useState<string[]>([]);
   const [wishlistItems, setWishlistItems] = useState<FeedItem[]>([]);
+  const [wishlistNotes, setWishlistNotes] = useState<Record<string, string>>({});
   const [isLoadingCustomerData, setIsLoadingCustomerData] = useState(false);
   const [customerDataError, setCustomerDataError] = useState<string | null>(null);
 
@@ -71,6 +76,7 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
 
         const wishlist = profile.customer.wishlist?.jsonValue ?? [];
         setWishlistGids(wishlist);
+        setWishlistNotes(profile.customer.wishlistNotes?.jsonValue ?? {});
 
         const recommendedGids = profile.customer.recommended?.jsonValue ?? [];
         const [products, wishlistProducts] = await Promise.all([
@@ -132,6 +138,47 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
     [feedItems, feedIndex, client.id, client.name, wishlistGids, getValidAccessToken],
   );
 
+  const removeFromWishlist = useCallback(
+    async (itemId: string) => {
+      const item = wishlistItems.find((i) => i.id === itemId);
+      const newWishlist = wishlistGids.filter((id) => id !== itemId);
+      const newNotes = { ...wishlistNotes };
+      delete newNotes[itemId];
+
+      const accessToken = await getValidAccessToken();
+      await Promise.all([
+        updateCustomerWishlist(accessToken, client.id, newWishlist),
+        updateCustomerWishlistNotes(accessToken, client.id, newNotes),
+      ]);
+
+      setWishlistGids(newWishlist);
+      setWishlistNotes(newNotes);
+      setWishlistItems((prev) => prev.filter((i) => i.id !== itemId));
+      setFeedItems((prev) => prev.map((f) => (f.id === itemId ? { ...f, reaction: null } : f)));
+      notifyStaff(client.name, 'Removed from wishlist', item?.name ?? itemId);
+    },
+    [wishlistItems, wishlistGids, wishlistNotes, client.id, client.name, getValidAccessToken],
+  );
+
+  const updateWishlistNote = useCallback(
+    async (itemId: string, note: string) => {
+      const item = wishlistItems.find((i) => i.id === itemId);
+      const newNotes = { ...wishlistNotes };
+      if (note.trim()) {
+        newNotes[itemId] = note.trim();
+      } else {
+        delete newNotes[itemId];
+      }
+
+      const accessToken = await getValidAccessToken();
+      await updateCustomerWishlistNotes(accessToken, client.id, newNotes);
+
+      setWishlistNotes(newNotes);
+      notifyStaff(client.name, 'Wishlist note', `${item?.name ?? itemId}: ${note.trim() || '(cleared)'}`);
+    },
+    [wishlistItems, wishlistNotes, client.id, client.name, getValidAccessToken],
+  );
+
   const updateMaterials = useCallback(
     async (materials: string[]) => {
       const accessToken = await getValidAccessToken();
@@ -167,7 +214,10 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
     currentFeedItem,
     savedItems,
     wishlistItems,
+    wishlistNotes,
     reactToCurrentItem,
+    removeFromWishlist,
+    updateWishlistNote,
     isLoadingCustomerData,
     customerDataError,
     updateMaterials,

@@ -91,6 +91,9 @@ const CUSTOMER_PROFILE_QUERY = `
       wishlist: metafield(namespace: "avenir_prive", key: "wishlist") {
         jsonValue
       }
+      wishlistNotes: metafield(namespace: "avenir_prive", key: "wishlist_notes") {
+        jsonValue
+      }
     }
   }
 `;
@@ -122,6 +125,7 @@ export interface CustomerProfileData {
     materials: { jsonValue: string[] | null } | null;
     brands: { jsonValue: string[] | null } | null;
     wishlist: { jsonValue: string[] | null } | null;
+    wishlistNotes: { jsonValue: Record<string, string> | null } | null;
   };
 }
 
@@ -217,4 +221,26 @@ export function updateCustomerWishlist(
   productGids: string[],
 ): Promise<void> {
   return updateCustomerProductList(accessToken, customerId, 'wishlist', productGids);
+}
+
+/** Saves the customer's short notes on wishlist items, keyed by product GID. */
+export async function updateCustomerWishlistNotes(
+  accessToken: string,
+  customerId: string,
+  notes: Record<string, string>,
+): Promise<void> {
+  const data = await customerApiQuery<SetTagListData>(accessToken, SET_TAG_LIST_MUTATION, {
+    metafields: [
+      {
+        ownerId: customerId,
+        namespace: 'avenir_prive',
+        key: 'wishlist_notes',
+        type: 'json',
+        value: JSON.stringify(notes),
+      },
+    ],
+  });
+  if (data.metafieldsSet.userErrors.length) {
+    throw new Error(data.metafieldsSet.userErrors.map((e) => e.message).join('; '));
+  }
 }
