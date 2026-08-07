@@ -82,6 +82,9 @@ const CUSTOMER_PROFILE_QUERY = `
       recommended: metafield(namespace: "avenir_prive", key: "recommended_products") {
         jsonValue
       }
+      materials: metafield(namespace: "avenir_prive", key: "materials_loved") {
+        jsonValue
+      }
     }
   }
 `;
@@ -110,9 +113,48 @@ export interface CustomerProfileData {
     emailAddress: { emailAddress: string } | null;
     orders: { edges: { node: CustomerOrder }[] };
     recommended: { jsonValue: string[] | null } | null;
+    materials: { jsonValue: string[] | null } | null;
   };
 }
 
 export async function fetchCustomerProfile(accessToken: string): Promise<CustomerProfileData> {
   return customerApiQuery<CustomerProfileData>(accessToken, CUSTOMER_PROFILE_QUERY);
+}
+
+const SET_MATERIALS_MUTATION = `
+  mutation SetMaterialsLoved($metafields: [MetafieldsSetInput!]!) {
+    metafieldsSet(metafields: $metafields) {
+      metafields { key value }
+      userErrors { field message }
+    }
+  }
+`;
+
+interface SetMaterialsData {
+  metafieldsSet: {
+    metafields: { key: string; value: string }[];
+    userErrors: { field: string[]; message: string }[];
+  };
+}
+
+/** Saves the customer's own "Materials You Love" tags back to their Shopify profile. */
+export async function updateCustomerMaterials(
+  accessToken: string,
+  customerId: string,
+  materials: string[],
+): Promise<void> {
+  const data = await customerApiQuery<SetMaterialsData>(accessToken, SET_MATERIALS_MUTATION, {
+    metafields: [
+      {
+        ownerId: customerId,
+        namespace: 'avenir_prive',
+        key: 'materials_loved',
+        type: 'list.single_line_text_field',
+        value: JSON.stringify(materials),
+      },
+    ],
+  });
+  if (data.metafieldsSet.userErrors.length) {
+    throw new Error(data.metafieldsSet.userErrors.map((e) => e.message).join('; '));
+  }
 }

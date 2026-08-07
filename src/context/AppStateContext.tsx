@@ -1,6 +1,6 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
-import { fetchCustomerProfile } from '../api/shopifyCustomerApi';
+import { fetchCustomerProfile, updateCustomerMaterials } from '../api/shopifyCustomerApi';
 import { resolveRecommendedProducts } from '../api/shopifyStorefrontApi';
 import { useAuth } from '../auth/AuthContext';
 import { isShopifyConfigured } from '../config/shopify';
@@ -23,6 +23,7 @@ interface AppStateValue {
   reactToCurrentItem: (reaction: 'saved' | 'passed') => void;
   isLoadingCustomerData: boolean;
   customerDataError: string | null;
+  updateMaterials: (materials: string[]) => Promise<void>;
 }
 
 const AppStateContext = createContext<AppStateValue | null>(null);
@@ -56,8 +57,10 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
         const fullName = [profile.customer.firstName, profile.customer.lastName].filter(Boolean).join(' ');
         setClient((prev) => ({
           ...prev,
+          id: profile.customer.id,
           name: fullName || prev.name,
           memberSince: new Date(profile.customer.creationDate).getFullYear(),
+          materials: profile.customer.materials?.jsonValue ?? [],
         }));
 
         const recommendedGids = profile.customer.recommended?.jsonValue ?? [];
@@ -107,6 +110,15 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
     setDraft('');
   }, [draft]);
 
+  const updateMaterials = useCallback(
+    async (materials: string[]) => {
+      const accessToken = await getValidAccessToken();
+      await updateCustomerMaterials(accessToken, client.id, materials);
+      setClient((prev) => ({ ...prev, materials }));
+    },
+    [client.id, getValidAccessToken],
+  );
+
   const currentFeedItem = feedItems[feedIndex] ?? null;
   const savedItems = useMemo(
     () => feedItems.filter((f) => f.reaction === 'saved'),
@@ -128,6 +140,7 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
     reactToCurrentItem,
     isLoadingCustomerData,
     customerDataError,
+    updateMaterials,
   };
 
   return <AppStateContext.Provider value={value}>{children}</AppStateContext.Provider>;
