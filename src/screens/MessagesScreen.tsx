@@ -1,8 +1,10 @@
 import { ArrowUpIcon } from 'phosphor-react-native';
-import React, { useRef } from 'react';
+import React, { useState } from 'react';
 import {
-  FlatList,
+  Alert,
+  Image,
   KeyboardAvoidingView,
+  Linking,
   Platform,
   Pressable,
   StyleSheet,
@@ -16,27 +18,30 @@ import { PlaceholderSwatch } from '../components/PlaceholderSwatch';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { useAppState } from '../context/AppStateContext';
 import { colors, fonts } from '../theme/tokens';
-import type { Message } from '../types';
+
+/** Where "Message" notes get emailed — there's no in-app inbox, this opens the customer's mail app. */
+const ADVISOR_EMAIL = 'jenrhoude@gmail.com';
 
 export function MessagesScreen() {
-  const { advisor, messages, draft, setDraft, sendMessage } = useAppState();
-  const listRef = useRef<FlatList<Message>>(null);
+  const { advisor, client } = useAppState();
+  const [draft, setDraft] = useState('');
+  const advisorFirstName = advisor.name.split(' ')[0];
 
-  const renderItem = ({ item }: { item: Message }) => {
-    const fromAdvisor = item.sender === 'advisor';
-    return (
-      <View style={[styles.bubbleRow, { justifyContent: fromAdvisor ? 'flex-start' : 'flex-end' }]}>
-        <View
-          style={[
-            styles.bubble,
-            fromAdvisor ? styles.advisorBubble : styles.clientBubble,
-          ]}
-        >
-          <Text style={fromAdvisor ? styles.advisorText : styles.clientText}>{item.text}</Text>
-          <Text style={fromAdvisor ? styles.advisorTime : styles.clientTime}>{item.time}</Text>
-        </View>
-      </View>
-    );
+  const handleSend = async () => {
+    const text = draft.trim();
+    if (!text) return;
+
+    const subject = encodeURIComponent(`Message from ${client.name} — Avenir Privé`);
+    const body = encodeURIComponent(`${text}\n\n— ${client.name}`);
+    const url = `mailto:${ADVISOR_EMAIL}?subject=${subject}&body=${body}`;
+
+    const canOpen = await Linking.canOpenURL(url);
+    if (!canOpen) {
+      Alert.alert('Could not open Mail', `Please email ${advisorFirstName} directly at ${ADVISOR_EMAIL}.`);
+      return;
+    }
+    await Linking.openURL(url);
+    setDraft('');
   };
 
   return (
@@ -46,7 +51,11 @@ export function MessagesScreen() {
       keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
     >
       <ScreenHeader style={styles.header}>
-        <PlaceholderSwatch palette={advisor.palette} style={styles.avatar} />
+        {advisor.photo ? (
+          <Image source={advisor.photo} style={styles.avatar} />
+        ) : (
+          <PlaceholderSwatch palette={advisor.palette} style={styles.avatar} />
+        )}
         <View>
           <Text style={styles.advisorName}>{advisor.name}</Text>
           <Eyebrow size={10.5} style={styles.advisorTitle}>
@@ -55,28 +64,30 @@ export function MessagesScreen() {
         </View>
       </ScreenHeader>
 
-      <FlatList
-        ref={listRef}
-        data={messages}
-        keyExtractor={(m) => m.id}
-        renderItem={renderItem}
-        contentContainerStyle={styles.thread}
-        onContentSizeChange={() => listRef.current?.scrollToEnd({ animated: true })}
-      />
+      <View style={styles.body}>
+        <Text style={styles.hint}>
+          Write a note below, then tap send — it opens your email app with the message ready to go to{' '}
+          {advisorFirstName}.
+        </Text>
+      </View>
 
       <View style={styles.composer}>
         <TextInput
           value={draft}
           onChangeText={setDraft}
-          placeholder={`Write to ${advisor.name.split(' ')[0]}…`}
+          placeholder={`Write to ${advisorFirstName}…`}
           placeholderTextColor={colors.clay}
           style={styles.input}
-          onSubmitEditing={sendMessage}
-          returnKeyType="send"
+          multiline
         />
         <Pressable
-          onPress={sendMessage}
-          style={({ pressed }) => [styles.sendButton, pressed && styles.sendButtonPressed]}
+          onPress={handleSend}
+          disabled={!draft.trim()}
+          style={({ pressed }) => [
+            styles.sendButton,
+            pressed && styles.sendButtonPressed,
+            !draft.trim() && styles.sendButtonDisabled,
+          ]}
         >
           <ArrowUpIcon size={17} color={colors.paper} weight="thin" />
         </Pressable>
@@ -110,51 +121,15 @@ const styles = StyleSheet.create({
     letterSpacing: 0,
     textTransform: 'none',
   },
-  thread: {
-    padding: 20,
-    gap: 14,
+  body: {
+    flex: 1,
+    padding: 24,
   },
-  bubbleRow: {
-    flexDirection: 'row',
-  },
-  bubble: {
-    maxWidth: '78%',
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-  },
-  advisorBubble: {
-    backgroundColor: colors.paper,
-    borderWidth: 1,
-    borderColor: colors.cardBorder,
-  },
-  clientBubble: {
-    backgroundColor: colors.obsidian,
-  },
-  advisorText: {
+  hint: {
     fontFamily: fonts.body,
     fontSize: 13.5,
-    lineHeight: 19.5,
-    color: colors.ink,
-  },
-  clientText: {
-    fontFamily: fonts.body,
-    fontSize: 13.5,
-    lineHeight: 19.5,
-    color: colors.paper,
-  },
-  advisorTime: {
-    fontFamily: fonts.body,
-    fontSize: 9.5,
-    color: colors.clay,
-    marginTop: 5,
-    textAlign: 'right',
-  },
-  clientTime: {
-    fontFamily: fonts.body,
-    fontSize: 9.5,
-    color: 'rgba(250,247,242,0.55)',
-    marginTop: 5,
-    textAlign: 'right',
+    lineHeight: 20,
+    color: colors.bark,
   },
   composer: {
     flexDirection: 'row',
@@ -164,7 +139,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: colors.hairline,
     backgroundColor: colors.paper,
-    alignItems: 'center',
+    alignItems: 'flex-end',
   },
   input: {
     flex: 1,
@@ -177,6 +152,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.stone,
     borderRadius: 4,
+    maxHeight: 120,
   },
   sendButton: {
     width: 44,
@@ -189,5 +165,8 @@ const styles = StyleSheet.create({
   },
   sendButtonPressed: {
     backgroundColor: colors.persianRedPress,
+  },
+  sendButtonDisabled: {
+    opacity: 0.4,
   },
 });

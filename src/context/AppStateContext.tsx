@@ -5,8 +5,8 @@ import { resolveRecommendedProducts } from '../api/shopifyStorefrontApi';
 import { useAuth } from '../auth/AuthContext';
 import { isShopifyConfigured } from '../config/shopify';
 import { mapOrdersToPurchases, mapProductsToFeedItems } from '../data/shopifyMapping';
-import { ADVISOR, CLIENT, INITIAL_FEED, INITIAL_MESSAGES, PURCHASES } from '../data/mockData';
-import type { Advisor, Client, FeedItem, Message, Purchase } from '../types';
+import { ADVISOR, CLIENT, INITIAL_FEED, PURCHASES } from '../data/mockData';
+import type { Advisor, Client, FeedItem, Purchase } from '../types';
 
 interface AppStateValue {
   client: Client;
@@ -16,10 +16,6 @@ interface AppStateValue {
   feedIndex: number;
   currentFeedItem: FeedItem | null;
   savedItems: FeedItem[];
-  messages: Message[];
-  draft: string;
-  setDraft: (text: string) => void;
-  sendMessage: () => void;
   reactToCurrentItem: (reaction: 'saved' | 'passed') => void;
   isLoadingCustomerData: boolean;
   customerDataError: string | null;
@@ -34,8 +30,6 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
   const [purchases, setPurchases] = useState<Purchase[]>(PURCHASES);
   const [feedItems, setFeedItems] = useState<FeedItem[]>(INITIAL_FEED);
   const [feedIndex, setFeedIndex] = useState(0);
-  const [messages, setMessages] = useState<Message[]>(INITIAL_MESSAGES);
-  const [draft, setDraft] = useState('');
   const [isLoadingCustomerData, setIsLoadingCustomerData] = useState(false);
   const [customerDataError, setCustomerDataError] = useState<string | null>(null);
 
@@ -94,22 +88,6 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
     [feedItems, feedIndex],
   );
 
-  const sendMessage = useCallback(() => {
-    const text = draft.trim();
-    if (!text) return;
-    setMessages((prev) => [
-      ...prev,
-      {
-        id: `local-${Date.now()}`,
-        sender: 'client',
-        text,
-        time: 'Just now',
-        read: true,
-      },
-    ]);
-    setDraft('');
-  }, [draft]);
-
   const updateMaterials = useCallback(
     async (materials: string[]) => {
       const accessToken = await getValidAccessToken();
@@ -133,10 +111,6 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
     feedIndex,
     currentFeedItem,
     savedItems,
-    messages,
-    draft,
-    setDraft,
-    sendMessage,
     reactToCurrentItem,
     isLoadingCustomerData,
     customerDataError,

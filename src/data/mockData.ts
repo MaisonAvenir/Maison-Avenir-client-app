@@ -1,4 +1,4 @@
-import type { Advisor, Client, FeedItem, Message, Purchase } from '../types';
+import type { Advisor, Client, FeedItem, Purchase } from '../types';
 
 // Mock data standing in for a real backend. Shapes mirror the state model
 // described in design/handoff/README.md ("State Management") so swapping
@@ -63,30 +63,6 @@ export const INITIAL_FEED: FeedItem[] = [
     material: 'Ceramic',
     note: 'Pairs with the vase from last summer.',
     reaction: null,
-  },
-];
-
-export const INITIAL_MESSAGES: Message[] = [
-  {
-    id: 'm1',
-    sender: 'advisor',
-    text: 'The Brass Candelabra just arrived — thought of your candlesticks straight away.',
-    time: '9:14 AM',
-    read: true,
-  },
-  {
-    id: 'm2',
-    sender: 'client',
-    text: 'It’s lovely. Does it come in a smaller scale?',
-    time: '9:20 AM',
-    read: true,
-  },
-  {
-    id: 'm3',
-    sender: 'advisor',
-    text: 'Yes — I’ll set one aside so you can see it in person before it’s listed.',
-    time: '9:22 AM',
-    read: true,
   },
 ];
 

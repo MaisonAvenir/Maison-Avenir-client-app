@@ -49,16 +49,6 @@ export interface FeedItem {
   imageUrl?: string;
 }
 
-export type MessageSender = 'advisor' | 'client';
-
-export interface Message {
-  id: string;
-  sender: MessageSender;
-  text: string;
-  time: string;
-  read: boolean;
-}
-
 export type RootTabParamList = {
   Home: undefined;
   ForYou: undefined;
