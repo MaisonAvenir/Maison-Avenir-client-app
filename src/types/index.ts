@@ -13,6 +13,8 @@ export interface Client {
   memberSince: number;
   /** Style/material preference tags, editable in Profile. */
   materials: string[];
+  /** Brand preference tags, editable in Profile. */
+  brands: string[];
 }
 
 export interface Advisor {

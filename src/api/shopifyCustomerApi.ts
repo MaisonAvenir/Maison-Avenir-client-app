@@ -85,6 +85,9 @@ const CUSTOMER_PROFILE_QUERY = `
       materials: metafield(namespace: "avenir_prive", key: "materials_loved") {
         jsonValue
       }
+      brands: metafield(namespace: "avenir_prive", key: "brands_loved") {
+        jsonValue
+      }
     }
   }
 `;
@@ -114,6 +117,7 @@ export interface CustomerProfileData {
     orders: { edges: { node: CustomerOrder }[] };
     recommended: { jsonValue: string[] | null } | null;
     materials: { jsonValue: string[] | null } | null;
+    brands: { jsonValue: string[] | null } | null;
   };
 }
 
@@ -121,8 +125,8 @@ export async function fetchCustomerProfile(accessToken: string): Promise<Custome
   return customerApiQuery<CustomerProfileData>(accessToken, CUSTOMER_PROFILE_QUERY);
 }
 
-const SET_MATERIALS_MUTATION = `
-  mutation SetMaterialsLoved($metafields: [MetafieldsSetInput!]!) {
+const SET_TAG_LIST_MUTATION = `
+  mutation SetTagListMetafield($metafields: [MetafieldsSetInput!]!) {
     metafieldsSet(metafields: $metafields) {
       metafields { key value }
       userErrors { field message }
@@ -130,31 +134,42 @@ const SET_MATERIALS_MUTATION = `
   }
 `;
 
-interface SetMaterialsData {
+interface SetTagListData {
   metafieldsSet: {
     metafields: { key: string; value: string }[];
     userErrors: { field: string[]; message: string }[];
   };
 }
 
-/** Saves the customer's own "Materials You Love" tags back to their Shopify profile. */
-export async function updateCustomerMaterials(
+/** Saves a customer-editable list.single_line_text_field metafield, e.g. materials_loved or brands_loved. */
+async function updateCustomerTagList(
   accessToken: string,
   customerId: string,
-  materials: string[],
+  key: string,
+  values: string[],
 ): Promise<void> {
-  const data = await customerApiQuery<SetMaterialsData>(accessToken, SET_MATERIALS_MUTATION, {
+  const data = await customerApiQuery<SetTagListData>(accessToken, SET_TAG_LIST_MUTATION, {
     metafields: [
       {
         ownerId: customerId,
         namespace: 'avenir_prive',
-        key: 'materials_loved',
+        key,
         type: 'list.single_line_text_field',
-        value: JSON.stringify(materials),
+        value: JSON.stringify(values),
       },
     ],
   });
   if (data.metafieldsSet.userErrors.length) {
     throw new Error(data.metafieldsSet.userErrors.map((e) => e.message).join('; '));
   }
+}
+
+/** Saves the customer's own "Materials You Love" tags back to their Shopify profile. */
+export function updateCustomerMaterials(accessToken: string, customerId: string, materials: string[]): Promise<void> {
+  return updateCustomerTagList(accessToken, customerId, 'materials_loved', materials);
+}
+
+/** Saves the customer's own "Brands You Love" tags back to their Shopify profile. */
+export function updateCustomerBrands(accessToken: string, customerId: string, brands: string[]): Promise<void> {
+  return updateCustomerTagList(accessToken, customerId, 'brands_loved', brands);
 }

@@ -1,8 +1,9 @@
 import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
-import React, { useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import React from 'react';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { Eyebrow } from '../components/Eyebrow';
+import { EditableTagList } from '../components/EditableTagList';
 import { PlaceholderSwatch } from '../components/PlaceholderSwatch';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { useAuth } from '../auth/AuthContext';
@@ -13,41 +14,8 @@ import type { RootTabParamList } from '../types';
 type Props = BottomTabScreenProps<RootTabParamList, 'Profile'>;
 
 export function ProfileScreen({ navigation }: Props) {
-  const { client, advisor, updateMaterials } = useAppState();
+  const { client, advisor, updateMaterials, updateBrands } = useAppState();
   const { logout } = useAuth();
-  const [draftMaterial, setDraftMaterial] = useState('');
-  const [savingMaterial, setSavingMaterial] = useState<string | null>(null);
-  const [materialsError, setMaterialsError] = useState<string | null>(null);
-
-  const addMaterial = async () => {
-    const material = draftMaterial.trim();
-    if (!material || client.materials.includes(material)) {
-      setDraftMaterial('');
-      return;
-    }
-    setMaterialsError(null);
-    setSavingMaterial(material);
-    try {
-      await updateMaterials([...client.materials, material]);
-      setDraftMaterial('');
-    } catch {
-      setMaterialsError("Couldn't save that — try again.");
-    } finally {
-      setSavingMaterial(null);
-    }
-  };
-
-  const removeMaterial = async (material: string) => {
-    setMaterialsError(null);
-    setSavingMaterial(material);
-    try {
-      await updateMaterials(client.materials.filter((m) => m !== material));
-    } catch {
-      setMaterialsError("Couldn't save that — try again.");
-    } finally {
-      setSavingMaterial(null);
-    }
-  };
 
   return (
     <View style={styles.screen}>
@@ -66,56 +34,21 @@ export function ProfileScreen({ navigation }: Props) {
           </Eyebrow>
         </View>
 
-        <View style={styles.section}>
-          <Eyebrow size={10.5} style={styles.sectionLabel}>
-            Materials You Love
-          </Eyebrow>
-          <Text style={styles.sectionHint}>Tell your advisor what to look for. Tap a tag to remove it.</Text>
+        <EditableTagList
+          label="Materials You Love"
+          hint="Tell your advisor what to look for. Tap a tag to remove it."
+          placeholder="Add a material, like Cashmere"
+          values={client.materials}
+          onChange={updateMaterials}
+        />
 
-          <View style={styles.chips}>
-            {client.materials.map((material) => (
-              <Pressable
-                key={material}
-                onPress={() => removeMaterial(material)}
-                disabled={savingMaterial === material}
-                style={({ pressed }) => [styles.chip, pressed && styles.chipPressed]}
-              >
-                <Text style={styles.chipText}>{material}</Text>
-                {savingMaterial === material ? (
-                  <ActivityIndicator size="small" color={colors.bark} style={styles.chipSpinner} />
-                ) : (
-                  <Text style={styles.chipRemove}>×</Text>
-                )}
-              </Pressable>
-            ))}
-          </View>
-
-          <View style={styles.addRow}>
-            <TextInput
-              value={draftMaterial}
-              onChangeText={setDraftMaterial}
-              placeholder="Add a material, like Cashmere"
-              placeholderTextColor={colors.clay}
-              style={styles.addInput}
-              returnKeyType="done"
-              onSubmitEditing={addMaterial}
-            />
-            <Pressable
-              onPress={addMaterial}
-              disabled={!draftMaterial.trim()}
-              style={({ pressed }) => [
-                styles.addButton,
-                pressed && styles.addButtonPressed,
-                !draftMaterial.trim() && styles.addButtonDisabled,
-              ]}
-            >
-              {({ pressed }) => (
-                <Text style={[styles.addButtonText, pressed && styles.addButtonTextPressed]}>Add</Text>
-              )}
-            </Pressable>
-          </View>
-          {materialsError && <Text style={styles.materialsError}>{materialsError}</Text>}
-        </View>
+        <EditableTagList
+          label="Brands You Love"
+          hint="Let your advisor know your favorite brands. Tap a tag to remove it."
+          placeholder="Add a brand, like Billy Reid"
+          values={client.brands}
+          onChange={updateBrands}
+        />
 
         <Pressable
           onPress={() => navigation.navigate('Messages')}
@@ -161,94 +94,6 @@ const styles = StyleSheet.create({
   memberSince: {
     marginTop: 6,
     letterSpacing: 1.1,
-  },
-  section: {
-    width: '100%',
-  },
-  sectionLabel: {
-    marginBottom: 6,
-    textAlign: 'left',
-  },
-  sectionHint: {
-    fontFamily: fonts.body,
-    fontSize: 11.5,
-    color: colors.bark,
-    marginBottom: 14,
-  },
-  chips: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  chip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: colors.stone,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    gap: 8,
-  },
-  chipPressed: {
-    backgroundColor: colors.paper,
-  },
-  chipText: {
-    fontFamily: fonts.body,
-    fontSize: 11,
-    color: colors.ink,
-  },
-  chipRemove: {
-    fontFamily: fonts.body,
-    fontSize: 13,
-    color: colors.clay,
-  },
-  chipSpinner: {
-    width: 11,
-    height: 11,
-  },
-  addRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    marginTop: 16,
-  },
-  addInput: {
-    flex: 1,
-    fontFamily: fonts.body,
-    fontSize: 13,
-    color: colors.ink,
-    borderWidth: 1,
-    borderColor: colors.stone,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-  },
-  addButton: {
-    borderWidth: 1,
-    borderColor: colors.ink,
-    paddingHorizontal: 16,
-    paddingVertical: 11,
-  },
-  addButtonPressed: {
-    backgroundColor: colors.ink,
-  },
-  addButtonDisabled: {
-    opacity: 0.4,
-  },
-  addButtonText: {
-    fontFamily: fonts.body,
-    fontSize: 10.5,
-    letterSpacing: 1.2,
-    textTransform: 'uppercase',
-    color: colors.ink,
-  },
-  addButtonTextPressed: {
-    color: colors.paper,
-  },
-  materialsError: {
-    fontFamily: fonts.body,
-    fontSize: 11,
-    color: colors.persianRed,
-    marginTop: 10,
   },
   contactButton: {
     width: '100%',

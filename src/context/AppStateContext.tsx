@@ -1,6 +1,6 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
-import { fetchCustomerProfile, updateCustomerMaterials } from '../api/shopifyCustomerApi';
+import { fetchCustomerProfile, updateCustomerBrands, updateCustomerMaterials } from '../api/shopifyCustomerApi';
 import { resolveRecommendedProducts } from '../api/shopifyStorefrontApi';
 import { useAuth } from '../auth/AuthContext';
 import { isShopifyConfigured } from '../config/shopify';
@@ -20,6 +20,7 @@ interface AppStateValue {
   isLoadingCustomerData: boolean;
   customerDataError: string | null;
   updateMaterials: (materials: string[]) => Promise<void>;
+  updateBrands: (brands: string[]) => Promise<void>;
 }
 
 const AppStateContext = createContext<AppStateValue | null>(null);
@@ -55,6 +56,7 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
           name: fullName || prev.name,
           memberSince: new Date(profile.customer.creationDate).getFullYear(),
           materials: profile.customer.materials?.jsonValue ?? [],
+          brands: profile.customer.brands?.jsonValue ?? [],
         }));
 
         const recommendedGids = profile.customer.recommended?.jsonValue ?? [];
@@ -97,6 +99,15 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
     [client.id, getValidAccessToken],
   );
 
+  const updateBrands = useCallback(
+    async (brands: string[]) => {
+      const accessToken = await getValidAccessToken();
+      await updateCustomerBrands(accessToken, client.id, brands);
+      setClient((prev) => ({ ...prev, brands }));
+    },
+    [client.id, getValidAccessToken],
+  );
+
   const currentFeedItem = feedItems[feedIndex] ?? null;
   const savedItems = useMemo(
     () => feedItems.filter((f) => f.reaction === 'saved'),
@@ -115,6 +126,7 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
     isLoadingCustomerData,
     customerDataError,
     updateMaterials,
+    updateBrands,
   };
 
   return <AppStateContext.Provider value={value}>{children}</AppStateContext.Provider>;

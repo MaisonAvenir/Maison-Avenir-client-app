@@ -9,6 +9,7 @@ export const CLIENT: Client = {
   name: 'Eleanor Whitfield',
   memberSince: 2019,
   materials: ['Brass', 'Linen', 'Oak', 'Ceramic'],
+  brands: [],
 };
 
 export const ADVISOR: Advisor = {
