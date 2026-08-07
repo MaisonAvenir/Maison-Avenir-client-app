@@ -19,8 +19,9 @@ export interface Advisor {
   id: string;
   name: string;
   title: string;
-  /** Placeholder for a real headshot until photography is available. */
+  /** Placeholder shown when no photo is set. */
   palette: PaletteKey;
+  photo?: number;
 }
 
 export interface Purchase {

@@ -13,9 +13,10 @@ export const CLIENT: Client = {
 
 export const ADVISOR: Advisor = {
   id: 'advisor-1',
-  name: 'Margaux Sinclair',
-  title: 'Client Advisor',
+  name: 'Jennifer Houde',
+  title: 'Buyer/Owner',
   palette: 'brass',
+  photo: require('../../assets/advisor-jennifer.jpg'),
 };
 
 export const PURCHASES: Purchase[] = [

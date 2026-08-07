@@ -35,7 +35,11 @@ export function HomeScreen({ navigation }: Props) {
         </View>
 
         <View style={styles.advisorCard}>
-          <PlaceholderSwatch palette={advisor.palette} style={styles.advisorAvatar} />
+          {advisor.photo ? (
+            <Image source={advisor.photo} style={styles.advisorAvatar} />
+          ) : (
+            <PlaceholderSwatch palette={advisor.palette} style={styles.advisorAvatar} />
+          )}
           <View style={styles.advisorInfo}>
             <Eyebrow size={9.5}>Your Advisor</Eyebrow>
             <Text style={styles.advisorName}>{advisor.name}</Text>
