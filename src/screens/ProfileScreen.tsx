@@ -1,10 +1,9 @@
 import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import React from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { Eyebrow } from '../components/Eyebrow';
 import { EditableTagList } from '../components/EditableTagList';
-import { PlaceholderSwatch } from '../components/PlaceholderSwatch';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { useAuth } from '../auth/AuthContext';
 import { useAppState } from '../context/AppStateContext';
@@ -27,7 +26,7 @@ export function ProfileScreen({ navigation }: Props) {
 
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.identity}>
-          <PlaceholderSwatch palette={advisor.palette} style={styles.avatar} />
+          <Image source={require('../../assets/logo-crest.png')} style={styles.avatar} resizeMode="contain" />
           <Text style={styles.clientName}>{client.name}</Text>
           <Eyebrow size={11} style={styles.memberSince}>
             Private Client since {client.memberSince}
