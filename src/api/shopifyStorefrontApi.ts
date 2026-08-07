@@ -32,13 +32,14 @@ async function storefrontQuery<T>(query: string, variables?: Record<string, unkn
 }
 
 const RESOLVE_PRODUCTS_QUERY = `
-  query ResolveRecommendedProducts($ids: [ID!]!) {
+  query ResolveProducts($ids: [ID!]!) {
     nodes(ids: $ids) {
       ... on Product {
         id
         title
         handle
         productType
+        vendor
         featuredImage { url altText }
         priceRange { minVariantPrice { amount currencyCode } }
       }
@@ -51,6 +52,7 @@ export interface StorefrontProduct {
   title: string;
   handle: string;
   productType: string;
+  vendor: string;
   featuredImage: { url: string; altText: string | null } | null;
   priceRange: { minVariantPrice: { amount: string; currencyCode: string } };
 }
@@ -59,7 +61,7 @@ interface ResolveProductsData {
   nodes: (StorefrontProduct | null)[];
 }
 
-/** Resolves product GIDs (e.g. from the recommended_products customer metafield) into display data. */
+/** Resolves product GIDs (e.g. from a customer metafield like recommended_products or wishlist) into display data. */
 export async function resolveRecommendedProducts(productGids: string[]): Promise<StorefrontProduct[]> {
   if (productGids.length === 0) return [];
   const data = await storefrontQuery<ResolveProductsData>(RESOLVE_PRODUCTS_QUERY, { ids: productGids });

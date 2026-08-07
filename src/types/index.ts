@@ -41,6 +41,7 @@ export type FeedReaction = 'saved' | 'passed' | null;
 export interface FeedItem {
   id: string;
   name: string;
+  brand: string;
   price: number;
   palette: PaletteKey;
   material: string;
@@ -54,6 +55,7 @@ export interface FeedItem {
 export type RootTabParamList = {
   Home: undefined;
   ForYou: undefined;
+  Wishlist: undefined;
   Messages: undefined;
   History: undefined;
   Profile: undefined;

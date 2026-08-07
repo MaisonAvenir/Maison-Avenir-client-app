@@ -41,6 +41,7 @@ export function mapProductsToFeedItems(products: StorefrontProduct[]): FeedItem[
   return products.map((product) => ({
     id: product.id,
     name: product.title,
+    brand: product.vendor || 'Maison Avenir',
     price: Number(product.priceRange.minVariantPrice.amount),
     palette: paletteForId(product.id),
     material: product.productType || 'New Arrival',

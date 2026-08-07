@@ -2,6 +2,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import {
   ChatCircleDotsIcon,
   ClockCounterClockwiseIcon,
+  HeartIcon,
   HouseIcon,
   SparkleIcon,
   UserIcon,
@@ -15,6 +16,7 @@ import { HistoryScreen } from '../screens/HistoryScreen';
 import { HomeScreen } from '../screens/HomeScreen';
 import { MessagesScreen } from '../screens/MessagesScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
+import { WishlistScreen } from '../screens/WishlistScreen';
 import { colors, fonts } from '../theme/tokens';
 import type { RootTabParamList } from '../types';
 
@@ -58,6 +60,14 @@ export function RootTabs() {
         options={{
           tabBarIcon: ({ color, size }) => <SparkleIcon color={color} size={size} weight="thin" />,
           tabBarLabel: ({ color }) => <Text style={[styles.label, { color }]}>For You</Text>,
+        }}
+      />
+      <Tab.Screen
+        name="Wishlist"
+        component={WishlistScreen}
+        options={{
+          tabBarIcon: ({ color, size }) => <HeartIcon color={color} size={size} weight="thin" />,
+          tabBarLabel: ({ color }) => <Text style={[styles.label, { color }]}>Wishlist</Text>,
         }}
       />
       <Tab.Screen

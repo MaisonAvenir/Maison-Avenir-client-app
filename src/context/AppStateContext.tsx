@@ -23,6 +23,7 @@ interface AppStateValue {
   feedIndex: number;
   currentFeedItem: FeedItem | null;
   savedItems: FeedItem[];
+  wishlistItems: FeedItem[];
   reactToCurrentItem: (reaction: 'saved' | 'passed') => void;
   isLoadingCustomerData: boolean;
   customerDataError: string | null;
@@ -39,6 +40,7 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
   const [feedItems, setFeedItems] = useState<FeedItem[]>(INITIAL_FEED);
   const [feedIndex, setFeedIndex] = useState(0);
   const [wishlistGids, setWishlistGids] = useState<string[]>([]);
+  const [wishlistItems, setWishlistItems] = useState<FeedItem[]>([]);
   const [isLoadingCustomerData, setIsLoadingCustomerData] = useState(false);
   const [customerDataError, setCustomerDataError] = useState<string | null>(null);
 
@@ -71,13 +73,17 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
         setWishlistGids(wishlist);
 
         const recommendedGids = profile.customer.recommended?.jsonValue ?? [];
-        const products = await resolveRecommendedProducts(recommendedGids);
+        const [products, wishlistProducts] = await Promise.all([
+          resolveRecommendedProducts(recommendedGids),
+          resolveRecommendedProducts(wishlist),
+        ]);
         if (cancelled) return;
         const items = mapProductsToFeedItems(products).map((item) =>
           wishlist.includes(item.id) ? { ...item, reaction: 'saved' as const } : item,
         );
         setFeedItems(items);
         setFeedIndex(0);
+        setWishlistItems(mapProductsToFeedItems(wishlistProducts));
       } catch (err) {
         if (!cancelled) {
           setCustomerDataError(err instanceof Error ? err.message : 'Could not load your account data.');
@@ -114,6 +120,7 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
       if (reaction === 'saved' && !wishlistGids.includes(item.id)) {
         const newWishlist = [...wishlistGids, item.id];
         setWishlistGids(newWishlist);
+        setWishlistItems((prev) => [...prev, { ...item, reaction: 'saved' }]);
         getValidAccessToken()
           .then((accessToken) => updateCustomerWishlist(accessToken, client.id, newWishlist))
           .catch(() => {
@@ -159,6 +166,7 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
     feedIndex,
     currentFeedItem,
     savedItems,
+    wishlistItems,
     reactToCurrentItem,
     isLoadingCustomerData,
     customerDataError,
