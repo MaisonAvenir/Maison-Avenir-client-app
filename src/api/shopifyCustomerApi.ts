@@ -88,6 +88,9 @@ const CUSTOMER_PROFILE_QUERY = `
       brands: metafield(namespace: "avenir_prive", key: "brands_loved") {
         jsonValue
       }
+      wishlist: metafield(namespace: "avenir_prive", key: "wishlist") {
+        jsonValue
+      }
     }
   }
 `;
@@ -118,6 +121,7 @@ export interface CustomerProfileData {
     recommended: { jsonValue: string[] | null } | null;
     materials: { jsonValue: string[] | null } | null;
     brands: { jsonValue: string[] | null } | null;
+    wishlist: { jsonValue: string[] | null } | null;
   };
 }
 
@@ -174,10 +178,11 @@ export function updateCustomerBrands(accessToken: string, customerId: string, br
   return updateCustomerTagList(accessToken, customerId, 'brands_loved', brands);
 }
 
-/** Removes a dismissed product from the staff-curated recommended_products list, so it's clear it was passed on. */
-export async function updateCustomerRecommendedProducts(
+/** Saves a customer-editable list.product_reference metafield, e.g. recommended_products or wishlist. */
+async function updateCustomerProductList(
   accessToken: string,
   customerId: string,
+  key: string,
   productGids: string[],
 ): Promise<void> {
   const data = await customerApiQuery<SetTagListData>(accessToken, SET_TAG_LIST_MUTATION, {
@@ -185,7 +190,7 @@ export async function updateCustomerRecommendedProducts(
       {
         ownerId: customerId,
         namespace: 'avenir_prive',
-        key: 'recommended_products',
+        key,
         type: 'list.product_reference',
         value: JSON.stringify(productGids),
       },
@@ -194,4 +199,22 @@ export async function updateCustomerRecommendedProducts(
   if (data.metafieldsSet.userErrors.length) {
     throw new Error(data.metafieldsSet.userErrors.map((e) => e.message).join('; '));
   }
+}
+
+/** Removes a dismissed product from the staff-curated recommended_products list, so it's clear it was passed on. */
+export function updateCustomerRecommendedProducts(
+  accessToken: string,
+  customerId: string,
+  productGids: string[],
+): Promise<void> {
+  return updateCustomerProductList(accessToken, customerId, 'recommended_products', productGids);
+}
+
+/** Saves the customer's own wishlist of saved products back to their Shopify profile. */
+export function updateCustomerWishlist(
+  accessToken: string,
+  customerId: string,
+  productGids: string[],
+): Promise<void> {
+  return updateCustomerProductList(accessToken, customerId, 'wishlist', productGids);
 }

@@ -5,6 +5,7 @@ import {
   updateCustomerBrands,
   updateCustomerMaterials,
   updateCustomerRecommendedProducts,
+  updateCustomerWishlist,
 } from '../api/shopifyCustomerApi';
 import { resolveRecommendedProducts } from '../api/shopifyStorefrontApi';
 import { notifyStaff } from '../api/staffNotify';
@@ -37,6 +38,7 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
   const [purchases, setPurchases] = useState<Purchase[]>(PURCHASES);
   const [feedItems, setFeedItems] = useState<FeedItem[]>(INITIAL_FEED);
   const [feedIndex, setFeedIndex] = useState(0);
+  const [wishlistGids, setWishlistGids] = useState<string[]>([]);
   const [isLoadingCustomerData, setIsLoadingCustomerData] = useState(false);
   const [customerDataError, setCustomerDataError] = useState<string | null>(null);
 
@@ -65,10 +67,16 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
           brands: profile.customer.brands?.jsonValue ?? [],
         }));
 
+        const wishlist = profile.customer.wishlist?.jsonValue ?? [];
+        setWishlistGids(wishlist);
+
         const recommendedGids = profile.customer.recommended?.jsonValue ?? [];
         const products = await resolveRecommendedProducts(recommendedGids);
         if (cancelled) return;
-        setFeedItems(mapProductsToFeedItems(products));
+        const items = mapProductsToFeedItems(products).map((item) =>
+          wishlist.includes(item.id) ? { ...item, reaction: 'saved' as const } : item,
+        );
+        setFeedItems(items);
         setFeedIndex(0);
       } catch (err) {
         if (!cancelled) {
@@ -102,8 +110,19 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
           });
         notifyStaff(client.name, 'Declined recommendation', item.name);
       }
+
+      if (reaction === 'saved' && !wishlistGids.includes(item.id)) {
+        const newWishlist = [...wishlistGids, item.id];
+        setWishlistGids(newWishlist);
+        getValidAccessToken()
+          .then((accessToken) => updateCustomerWishlist(accessToken, client.id, newWishlist))
+          .catch(() => {
+            // Best-effort sync — the item still shows as saved on this device either way.
+          });
+        notifyStaff(client.name, 'Saved to wishlist', item.name);
+      }
     },
-    [feedItems, feedIndex, client.id, client.name, getValidAccessToken],
+    [feedItems, feedIndex, client.id, client.name, wishlistGids, getValidAccessToken],
   );
 
   const updateMaterials = useCallback(
