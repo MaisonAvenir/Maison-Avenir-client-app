@@ -7,6 +7,7 @@ import {
   updateCustomerRecommendedProducts,
 } from '../api/shopifyCustomerApi';
 import { resolveRecommendedProducts } from '../api/shopifyStorefrontApi';
+import { notifyStaff } from '../api/staffNotify';
 import { useAuth } from '../auth/AuthContext';
 import { isShopifyConfigured } from '../config/shopify';
 import { mapOrdersToPurchases, mapProductsToFeedItems } from '../data/shopifyMapping';
@@ -99,9 +100,10 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
           .catch(() => {
             // Best-effort sync — the item still disappears from this device's feed either way.
           });
+        notifyStaff(client.name, 'Declined recommendation', item.name);
       }
     },
-    [feedItems, feedIndex, client.id, getValidAccessToken],
+    [feedItems, feedIndex, client.id, client.name, getValidAccessToken],
   );
 
   const updateMaterials = useCallback(
@@ -109,8 +111,9 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
       const accessToken = await getValidAccessToken();
       await updateCustomerMaterials(accessToken, client.id, materials);
       setClient((prev) => ({ ...prev, materials }));
+      notifyStaff(client.name, 'Materials You Love', materials.join(', ') || '(none)');
     },
-    [client.id, getValidAccessToken],
+    [client.id, client.name, getValidAccessToken],
   );
 
   const updateBrands = useCallback(
@@ -118,8 +121,9 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
       const accessToken = await getValidAccessToken();
       await updateCustomerBrands(accessToken, client.id, brands);
       setClient((prev) => ({ ...prev, brands }));
+      notifyStaff(client.name, 'Brands You Love', brands.join(', ') || '(none)');
     },
-    [client.id, getValidAccessToken],
+    [client.id, client.name, getValidAccessToken],
   );
 
   const currentFeedItem = feedItems[feedIndex] ?? null;
