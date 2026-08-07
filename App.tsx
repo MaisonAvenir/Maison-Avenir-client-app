@@ -12,6 +12,7 @@ import { StatusBar } from 'expo-status-bar';
 import React, { useCallback } from 'react';
 import { View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { enableScreens } from 'react-native-screens';
 
 import { AuthProvider, useAuth } from './src/auth/AuthContext';
 import { isShopifyConfigured } from './src/config/shopify';
@@ -19,6 +20,11 @@ import { AppStateProvider } from './src/context/AppStateContext';
 import { RootTabs } from './src/navigation/RootTabs';
 import { LoginScreen } from './src/screens/LoginScreen';
 import { colors } from './src/theme/tokens';
+
+// Works around a known iOS 26 crash where react-native-screens' native tab bar
+// (RNSTabBarController) throws an NSException that React Native's TurboModule
+// bridge can't catch, aborting the app moments after launch.
+enableScreens(false);
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
