@@ -173,3 +173,25 @@ export function updateCustomerMaterials(accessToken: string, customerId: string,
 export function updateCustomerBrands(accessToken: string, customerId: string, brands: string[]): Promise<void> {
   return updateCustomerTagList(accessToken, customerId, 'brands_loved', brands);
 }
+
+/** Removes a dismissed product from the staff-curated recommended_products list, so it's clear it was passed on. */
+export async function updateCustomerRecommendedProducts(
+  accessToken: string,
+  customerId: string,
+  productGids: string[],
+): Promise<void> {
+  const data = await customerApiQuery<SetTagListData>(accessToken, SET_TAG_LIST_MUTATION, {
+    metafields: [
+      {
+        ownerId: customerId,
+        namespace: 'avenir_prive',
+        key: 'recommended_products',
+        type: 'list.product_reference',
+        value: JSON.stringify(productGids),
+      },
+    ],
+  });
+  if (data.metafieldsSet.userErrors.length) {
+    throw new Error(data.metafieldsSet.userErrors.map((e) => e.message).join('; '));
+  }
+}

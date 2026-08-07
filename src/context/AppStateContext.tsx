@@ -1,6 +1,11 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
-import { fetchCustomerProfile, updateCustomerBrands, updateCustomerMaterials } from '../api/shopifyCustomerApi';
+import {
+  fetchCustomerProfile,
+  updateCustomerBrands,
+  updateCustomerMaterials,
+  updateCustomerRecommendedProducts,
+} from '../api/shopifyCustomerApi';
 import { resolveRecommendedProducts } from '../api/shopifyStorefrontApi';
 import { useAuth } from '../auth/AuthContext';
 import { isShopifyConfigured } from '../config/shopify';
@@ -82,12 +87,21 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
     (reaction: 'saved' | 'passed') => {
       const item = feedItems[feedIndex];
       if (!item) return;
-      setFeedItems((prev) =>
-        prev.map((f) => (f.id === item.id ? { ...f, reaction } : f)),
-      );
+      const updatedFeedItems = feedItems.map((f) => (f.id === item.id ? { ...f, reaction } : f));
+      setFeedItems(updatedFeedItems);
       setFeedIndex((i) => i + 1);
+
+      if (reaction === 'passed') {
+        // Drop it (and any earlier passes) from the staff-curated list in Shopify too, so it's clear it was seen and declined.
+        const remainingGids = updatedFeedItems.filter((f) => f.reaction !== 'passed').map((f) => f.id);
+        getValidAccessToken()
+          .then((accessToken) => updateCustomerRecommendedProducts(accessToken, client.id, remainingGids))
+          .catch(() => {
+            // Best-effort sync — the item still disappears from this device's feed either way.
+          });
+      }
     },
-    [feedItems, feedIndex],
+    [feedItems, feedIndex, client.id, getValidAccessToken],
   );
 
   const updateMaterials = useCallback(
