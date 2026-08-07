@@ -1,3 +1,4 @@
+import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { LinearGradient } from 'expo-linear-gradient';
 import React from 'react';
 import { ActivityIndicator, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
@@ -8,8 +9,11 @@ import { ScreenHeader } from '../components/ScreenHeader';
 import { useAppState } from '../context/AppStateContext';
 import { formatPrice } from '../data/mockData';
 import { colors, fonts } from '../theme/tokens';
+import type { RootTabParamList } from '../types';
 
-export function ForYouScreen() {
+type Props = BottomTabScreenProps<RootTabParamList, 'ForYou'>;
+
+export function ForYouScreen({ navigation }: Props) {
   const {
     advisor,
     feedItems,
@@ -56,10 +60,13 @@ export function ForYouScreen() {
 
   return (
     <View style={styles.screen}>
-      <ScreenHeader>
+      <ScreenHeader style={styles.header}>
         <Eyebrow align="center" size={11}>
           For You
         </Eyebrow>
+        <Pressable onPress={() => navigation.navigate('Wishlist')} style={styles.wishlistLink}>
+          <Text style={styles.wishlistLinkText}>Wishlist</Text>
+        </Pressable>
       </ScreenHeader>
 
       <ScrollView contentContainerStyle={styles.content}>
@@ -126,6 +133,23 @@ export function ForYouScreen() {
 }
 
 const styles = StyleSheet.create({
+  header: {
+    position: 'relative',
+  },
+  wishlistLink: {
+    position: 'absolute',
+    right: 24,
+    bottom: 16,
+  },
+  wishlistLinkText: {
+    fontFamily: fonts.body,
+    fontSize: 10.5,
+    letterSpacing: 1.2,
+    textTransform: 'uppercase',
+    color: colors.ink,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(42,38,34,0.12)',
+  },
   centered: {
     flex: 1,
     alignItems: 'center',

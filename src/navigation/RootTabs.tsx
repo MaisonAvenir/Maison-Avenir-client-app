@@ -2,7 +2,6 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import {
   ChatCircleDotsIcon,
   ClockCounterClockwiseIcon,
-  HeartIcon,
   HouseIcon,
   SparkleIcon,
   UserIcon,
@@ -66,8 +65,9 @@ export function RootTabs() {
         name="Wishlist"
         component={WishlistScreen}
         options={{
-          tabBarIcon: ({ color, size }) => <HeartIcon color={color} size={size} weight="thin" />,
-          tabBarLabel: ({ color }) => <Text style={[styles.label, { color }]}>Wishlist</Text>,
+          // Reachable via the "Wishlist" link on For You, not a bottom tab icon —
+          // keeps the tab bar at 5 items.
+          tabBarButton: () => null,
         }}
       />
       <Tab.Screen
