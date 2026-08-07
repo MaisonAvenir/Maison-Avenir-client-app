@@ -79,24 +79,26 @@ export function HomeScreen({ navigation }: Props) {
           </ScrollView>
         </View>
 
-        <View>
-          <Eyebrow size={10.5} style={styles.recentlyLabel}>
-            Recently Yours
-          </Eyebrow>
-          <View style={styles.recentCard}>
-            {recentPurchase.imageUrl ? (
-              <Image source={{ uri: recentPurchase.imageUrl }} style={styles.recentThumb} />
-            ) : (
-              <PlaceholderSwatch palette={recentPurchase.palette} style={styles.recentThumb} />
-            )}
-            <View style={styles.recentInfo}>
-              <Text style={styles.recentName}>{recentPurchase.name}</Text>
-              <Text style={styles.recentMeta}>
-                {recentPurchase.date} · {formatPrice(recentPurchase.price)}
-              </Text>
+        {recentPurchase && (
+          <View>
+            <Eyebrow size={10.5} style={styles.recentlyLabel}>
+              Recently Yours
+            </Eyebrow>
+            <View style={styles.recentCard}>
+              {recentPurchase.imageUrl ? (
+                <Image source={{ uri: recentPurchase.imageUrl }} style={styles.recentThumb} />
+              ) : (
+                <PlaceholderSwatch palette={recentPurchase.palette} style={styles.recentThumb} />
+              )}
+              <View style={styles.recentInfo}>
+                <Text style={styles.recentName}>{recentPurchase.name}</Text>
+                <Text style={styles.recentMeta}>
+                  {recentPurchase.date} · {formatPrice(recentPurchase.price)}
+                </Text>
+              </View>
             </View>
           </View>
-        </View>
+        )}
       </ScrollView>
     </View>
   );
